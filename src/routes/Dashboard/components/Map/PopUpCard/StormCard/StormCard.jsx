@@ -1,12 +1,22 @@
 import React from 'react';
+import { connect } from 'react-redux';
+import { acknowledgeRecommendation } from 'routes/Dashboard/modules/Dashboard';
 import classes from '../PopUpCard.scss';
 
-const StormCard = ({ storm }) => {
+
+const StormCard = (props) => {
+  console.log(props);
   const {
     event,
     recommendations,
-  } = storm;
+  } = props.storm;
 
+  function handleRecommendation(id, approve) {
+    if (approve) {
+      console.log('approving shipment ', id);
+      props.acknowledgeRecommendation();
+    }
+  }
 
   return (
     <div className={classes.contentContainer}>
@@ -41,10 +51,16 @@ const StormCard = ({ storm }) => {
               Shipment from {recommendation.fromId} to {recommendation.toId}
             </div>
             <div className={classes.shipmentDialogActionContainer}>
-              <div className={classes.shipmentDialogAction}>
+              <div
+                className={classes.shipmentDialogAction}
+                onClick={() => handleRecommendation(recommendation._id, false)}
+              >
                 Reject
               </div>
-              <div className={classes.shipmentDialogAction}>
+              <div
+                className={classes.shipmentDialogAction}
+                onClick={() => handleRecommendation(recommendation._id, true)}
+              >
                 Approve
               </div>
             </div>
@@ -59,4 +75,11 @@ StormCard.propTypes = {
   storm: React.PropTypes.object.isRequired,
 };
 
-export default StormCard;
+const mapStateToProps = () => ({
+});
+
+const mapActionCreators = {
+  acknowledgeRecommendation,
+};
+
+export default connect(mapStateToProps, mapActionCreators)(StormCard);

@@ -12,6 +12,7 @@ export const SIMULATE_WEATHER = 'Dashboard/SIMULATE_WEATHER';
 export const SELECT_MARKER = 'Dashboard/SELECT_MARKER';
 export const ADMIN_DATA_RECEIVED = 'Dashboard/ADMIN_DATA_RECEIVED';
 export const WEATHER_DATA_RECEIVED = 'Dashboard/WEATHER_DATA_RECEIVED';
+export const ACKNOWLEDGE_RECOMMENDATAION = 'Dashboard/ACKNOWLEDGE_RECOMMENDATAION';
 
 // ------------------------------------
 // Actions
@@ -43,11 +44,18 @@ export const weatherDataReceived = payload => ({
   payload,
 });
 
+export const acknowledgeRecommendation = (recommendationId) => ({
+  type: ACKNOWLEDGE_RECOMMENDATAION,
+  recommendationId,
+});
+
 export const actions = {
   selectMarker,
   getAdminData,
   adminDataReceived,
   weatherDataReceived,
+  acknowledgeRecommendation,
+
 };
 
 // ------------------------------------
@@ -126,7 +134,25 @@ export function *watchSimulateWeather() {
   }
 }
 
+export function *watchAcknowledgeRecommendation() {
+  while (true) {
+    const { payload } = yield take(ACKNOWLEDGE_RECOMMENDATAION);
+    console.log('payload: ', payload);
+    const demoState = yield select(demoSelector);
+
+    try {
+      const weatherData = yield call(api.acknowledgeRecommendation, demoState.token);
+      yield put(weatherDataReceived(weatherData));
+    }
+    catch (error) {
+      console.log('Failed to retrieve weather data');
+      console.error(error);
+    }
+  }
+}
+
 export const sagas = [
   watchGetAdminData,
   watchSimulateWeather,
+  watchAcknowledgeRecommendation,
 ];
