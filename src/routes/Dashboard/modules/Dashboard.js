@@ -84,9 +84,11 @@ const ACTION_HANDLERS = {
     weather: [action.payload],
   }),
   [RECOMMENDATIONS_RECEIVED]: (state, action) => {
-    console.log('state: ', state);
-    state.weather[0].recommendations = [action.payload];
-    return state;
+    console.log('OLD state: ', state);
+    const newState = JSON.parse(JSON.stringify(state)); // Need better way to deep clone object
+    newState.weather[0].recommendations = action.payload.recommendations;
+    console.log('NEW state: ', newState);
+    return newState;
   },
 };
 
@@ -150,7 +152,6 @@ export function *watchSimulateStorm() {
 
 export function *watchAcknowledgeRecommendation() {
   while (true) {
-    console.log('watchAcknowledgeRecommendation: ', watchAcknowledgeRecommendation);
     const { payload } = yield take(ACKNOWLEDGE_RECOMMENDATAION);
     console.log('recommendationId: ', payload.recommendationId);
     const demoState = yield select(demoSelector);
@@ -162,6 +163,7 @@ export function *watchAcknowledgeRecommendation() {
       const recommendations = yield call(api.getRecommendations, demoState.token);
       console.log('recommendations: ', recommendations);
       yield put(recommendationsReceived(recommendations));
+      yield put(selectMarker('hidden', {}));
     }
     catch (error) {
       console.log('Error in acknowledgeRecommendation');

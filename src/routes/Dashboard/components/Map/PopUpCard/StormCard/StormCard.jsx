@@ -46,7 +46,7 @@ const StormCard = (props) => {
           Consider sending additional supplies to affected locations.
         </small>
         {recommendations.map(recommendation =>
-          <div className={classes.shipmentDialog}>
+          <div className={classes.shipmentDialog} key={recommendation._id}>
             <div className={classes.shipmentTitle}>
               Shipment from {recommendation.fromId} to {recommendation.toId}
             </div>
