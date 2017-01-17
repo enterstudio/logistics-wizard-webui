@@ -7,7 +7,7 @@ import Dashboard from './Dashboard';
 
 const setup = () => {
   const spies = {
-    simulateWeather: sinon.spy(),
+    simulateStorm: sinon.spy(),
   };
   const props = {
     demoName: 'Test Demo',

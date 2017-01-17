@@ -8,10 +8,11 @@ export const dashboardSelector = state => state.dashboard;
 // Constants
 // ------------------------------------
 export const GET_ADMIN_DATA = 'Dashboard/GET_ADMIN_DATA';
-export const SIMULATE_WEATHER = 'Dashboard/SIMULATE_WEATHER';
+export const SIMULATE_STORM = 'Dashboard/SIMULATE_STORM';
 export const SELECT_MARKER = 'Dashboard/SELECT_MARKER';
 export const ADMIN_DATA_RECEIVED = 'Dashboard/ADMIN_DATA_RECEIVED';
-export const WEATHER_DATA_RECEIVED = 'Dashboard/WEATHER_DATA_RECEIVED';
+export const STORM_RECEIVED = 'Dashboard/STORM_RECEIVED';
+export const RECOMMENDATIONS_RECEIVED = 'Dashboard/RECOMMENDATIONS_RECEIVED';
 export const ACKNOWLEDGE_RECOMMENDATAION = 'Dashboard/ACKNOWLEDGE_RECOMMENDATAION';
 
 // ------------------------------------
@@ -36,24 +37,32 @@ export const adminDataReceived = (payload) => ({
 });
 
 export const simulateWeather = () => ({
-  type: SIMULATE_WEATHER,
+  type: SIMULATE_STORM,
 });
 
-export const weatherDataReceived = payload => ({
-  type: WEATHER_DATA_RECEIVED,
+export const stormReceived = payload => ({
+  type: STORM_RECEIVED,
+  payload,
+});
+
+export const recommendationsReceived = payload => ({
+  type: RECOMMENDATIONS_RECEIVED,
   payload,
 });
 
 export const acknowledgeRecommendation = (recommendationId) => ({
   type: ACKNOWLEDGE_RECOMMENDATAION,
-  recommendationId,
+  payload: {
+    recommendationId,
+  },
 });
 
 export const actions = {
   selectMarker,
   getAdminData,
   adminDataReceived,
-  weatherDataReceived,
+  stormReceived,
+  recommendationsReceived,
   acknowledgeRecommendation,
 
 };
@@ -70,10 +79,15 @@ const ACTION_HANDLERS = {
     ...state,
     ...action.payload,
   }),
-  [WEATHER_DATA_RECEIVED]: (state, action) => ({
+  [STORM_RECEIVED]: (state, action) => ({
     ...state,
     weather: [action.payload],
   }),
+  [RECOMMENDATIONS_RECEIVED]: (state, action) => {
+    console.log('state: ', state);
+    state.weather[0].recommendations = [action.payload];
+    return state;
+  },
 };
 
 // ------------------------------------
@@ -118,17 +132,17 @@ export function *watchGetAdminData() {
   }
 }
 
-export function *watchSimulateWeather() {
+export function *watchSimulateStorm() {
   while (true) {
-    yield take(SIMULATE_WEATHER);
+    yield take(SIMULATE_STORM);
     const demoState = yield select(demoSelector);
 
     try {
-      const weatherData = yield call(api.simulateWeather, demoState.token);
-      yield put(weatherDataReceived(weatherData));
+      const recommendations = yield call(api.simulateStorm, demoState.token);
+      yield put(stormReceived(recommendations));
     }
     catch (error) {
-      console.log('Failed to retrieve weather data');
+      console.log('Failed to retrieve recommendations from simulating storm');
       console.error(error);
     }
   }
@@ -136,16 +150,21 @@ export function *watchSimulateWeather() {
 
 export function *watchAcknowledgeRecommendation() {
   while (true) {
+    console.log('watchAcknowledgeRecommendation: ', watchAcknowledgeRecommendation);
     const { payload } = yield take(ACKNOWLEDGE_RECOMMENDATAION);
-    console.log('payload: ', payload);
+    console.log('recommendationId: ', payload.recommendationId);
     const demoState = yield select(demoSelector);
 
     try {
-      const weatherData = yield call(api.acknowledgeRecommendation, demoState.token);
-      yield put(weatherDataReceived(weatherData));
+      const acknowledgeResponse =
+        yield call(api.postAcknowledgeRecommendation, demoState.token, payload.recommendationId);
+      console.log('acknowledgeResponse: ', acknowledgeResponse);
+      const recommendations = yield call(api.getRecommendations, demoState.token);
+      console.log('recommendations: ', recommendations);
+      yield put(recommendationsReceived(recommendations));
     }
     catch (error) {
-      console.log('Failed to retrieve weather data');
+      console.log('Error in acknowledgeRecommendation');
       console.error(error);
     }
   }
@@ -153,6 +172,6 @@ export function *watchAcknowledgeRecommendation() {
 
 export const sagas = [
   watchGetAdminData,
-  watchSimulateWeather,
+  watchSimulateStorm,
   watchAcknowledgeRecommendation,
 ];

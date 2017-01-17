@@ -14,7 +14,7 @@ const StormCard = (props) => {
   function handleRecommendation(id, approve) {
     if (approve) {
       console.log('approving shipment ', id);
-      props.acknowledgeRecommendation();
+      props.acknowledgeRecommendation(id);
     }
   }
 
