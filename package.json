@@ -23,7 +23,9 @@
     "deploy:prod": "better-npm-run deploy:prod",
     "storybook": "start-storybook -p 9001",
     "coveralls": "cat coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
-    "check-coverage": "nyc check-coverage --statements 70 --branches 50 --functions 50 --lines 70"
+    "check-coverage": "nyc check-coverage --statements 70 --branches 50 --functions 50 --lines 70",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "betterScripts": {
     "compile": {
@@ -138,7 +140,8 @@
     "webpack": "^1.12.14",
     "webpack-hot-middleware": "^2.12.2",
     "whatwg-fetch": "^2.0.2",
-    "yargs": "^4.0.0"
+    "yargs": "^4.0.0",
+    "snyk": "^1.189.0"
   },
   "devDependencies": {
     "@kadira/react-storybook-decorator-centered": "^1.0.0",
@@ -202,5 +205,6 @@
       "text",
       "lcov"
     ]
-  }
+  },
+  "snyk": true
 }
